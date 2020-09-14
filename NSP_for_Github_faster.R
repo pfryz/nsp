@@ -810,16 +810,96 @@ random_checks_scan_array_selfnorm <- function(ind, ads.array, M, thresh, Vn2est,
 }
 
 
+random_checks_scan_array_selfnorm_1by1 <- function(ind, ads.array, M, thresh, Vn2est, criterion = "narrowest", eps = 0.03, c = exp(1 + 2 * eps)) {
+
+	s <- ind[1]
+	e <- ind[2]
+	n <- e - s + 1
+	
+	if (n > 1) {
+
+		indices <- ((ads.array$shifts+1) <= (n/2))
+	
+		ads.array$res <- ads.array$res[s:e,,indices,drop=F]
+	
+		ads.array$shifts <- ads.array$shifts[indices]
+	
+		M <- min(M, (n-1)*n/2)
+
+		ind <- grid.intervals.sorted(n, M)
+
+		M <- dim(ind)[2]
+
+		res <- matrix(0, M, 3)
+
+		res[,1:2] <- t(ind)
+
+		zero.check <- TRUE
+		j <- 1
+		
+		while (zero.check && (j <= M)) {
+			
+			res[j,3] <- check_interval_array_selfnorm(res[j,1:2], ads.array, thresh, Vn2est, eps, c)
+			zero.check <- (res[j,3] == 0)
+			j <- j + 1
+			
+		}
+
+
+
+#		res[,3] <- apply(ind, 2, check_interval_array_selfnorm, ads.array, thresh, Vn2est, eps, c)
+	
+		filtered.res <- res[(res[,3] > 0),, drop = F]
+	
+		d <- dim(filtered.res)
+
+		if (d[1]) {
+		
+			if (criterion == "narrowest") {
+				lnghts <- filtered.res[,2] - filtered.res[,1]
+				min.indices <- which(lnghts == min(lnghts))
+				selected.ind <- min.indices[which.max(filtered.res[min.indices,3])]
+			}
+			
+			else if (criterion == "largest") selected.ind <- which.max(filtered.res[,3])
+			
+			selected.val <- filtered.res[selected.ind,,drop=F]
+		
+		}
+
+		else {
+		
+			selected.ind <- NA
+			selected.val <- matrix(0, 0, 3)
+		
+		}
+
+	}
+
+	else {
+		
+		filtered.res <- selected.val <- matrix(0, 0, 3)
+		selected.ind <- NA
+		M <- 0
+		
+	}
+
+	list(res=filtered.res, selected.ind = selected.ind, selected.val = selected.val, M.eff=max(1, M))
+
+}
+
+
+
 random_checks_scan_2stage_array_selfnorm <- rcs2sas <- function(ind, ads.array, M, thresh, Vn2est, stage1 = "narrowest", eps = 0.03, c = exp(1 + 2 * eps)) {
 		
-	s1 <- random_checks_scan_array_selfnorm(ind, ads.array, M, thresh, Vn2est, stage1, eps, c)
+	s1 <- random_checks_scan_array_selfnorm_1by1(ind, ads.array, M, thresh, Vn2est, stage1, eps, c)
 		
 	if (!is.na(s1$selected.ind)) {
 		
 		s <- s1$selected.val[1,1] + ind[1] - 1
 		e <- s1$selected.val[1,2] + ind[1] - 1
 		
-		s2 <- random_checks_scan_array_selfnorm(c(s,e), ads.array, M, thresh, Vn2est, "narrowest", eps, c)
+		s2 <- random_checks_scan_array_selfnorm_1by1(c(s,e), ads.array, M, thresh, Vn2est, "narrowest", eps, c)
 
 		if (!is.na(s2$selected.ind)) {
 			
