@@ -678,6 +678,7 @@ lp_selfnorm <- function(ind, ads.array, selfnorm.array) {
 	for (i in 1:scales) {
 				
 		f.con.rhs.current <- ads.array$res[1:(n-ads.const$shifts[i]),,i]  / selfnorm.array[1:(n-ads.const$shifts[i]),i]
+		f.con.rhs.current[!is.finite(f.con.rhs.current)] <- 0
 		f.con.rhs.current <- cbind(f.con.rhs.current, -f.con.rhs.current[,-1])
 		
 		f.con.rhs.core <- rbind(f.con.rhs.core, f.con.rhs.current)		
