@@ -14,6 +14,6 @@ To use NSP_for_Github_faster.R, do the following:
 
 This content will be turned into an R package and posted on CRAN at the earliest opportunity.
 
-NOTE: To reproduce the results from the paper, use the older and slower code in NSP_for_Github_slow.R.
+NOTE: To reproduce the results from the paper exactly, use the older and slower code in NSP_for_Github_slow.R.
 
 Questions/comments? - p.fryzlewicz@lse.ac.uk (Piotr Fryzlewicz)
