@@ -290,6 +290,41 @@ cpt.importance <- function(nsp.obj) {
 	
 }
 
+order_chron <- function(nsp.obj) {
+	
+	# Order intervals of significance chronologically.
+	# nsp.obj - quantity returned by one of the nsp_* functions.
+
+	d <- dim(nsp.obj)
+	if (d[2]) {
+		nsp.obj.ord <- order(nsp.obj[1,])
+		nsp.obj <- nsp.obj[,nsp.obj.ord]
+	}	
+	
+	nsp.obj
+	
+}
+
+select_narrowest <- function(nsp.obj, how.many = dim(nsp.obj)[2], order.chron = FALSE) {
+	
+	# Select how.many narrowest intervals of significance.
+	# nsp.obj - quantity returned by one of the nsp_* functions.
+	# order.chron - whether to order them chronologically (TRUE) or in increasing order of width (FALSE).
+	
+	d <- dim(nsp.obj)
+	if (d[2]) {
+		nsp.obj.ord <- order(nsp.obj[2,] - nsp.obj[1,])
+		nsp.obj <- nsp.obj[,nsp.obj.ord]
+
+		if (how.many) nsp.obj <- nsp.obj[,1:min(how.many, d[2])]
+		
+		if (order.chron) nsp.obj <- order_chron(nsp.obj)
+
+	}	
+	
+	nsp.obj
+		
+}
 
 
 #######################################################################
