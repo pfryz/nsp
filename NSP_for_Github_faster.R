@@ -8,14 +8,13 @@ library(lpSolve)
 load("wiener_holder_norms.txt")
 
 
-nsp <- function(x, constraints, M, thresh, stage1 = "narrowest", overlap = FALSE, buffer = 0) {
+nsp <- function(x, constraints, M, thresh, overlap = FALSE, buffer = 0) {
 	
 	# Generic NSP function. Do not use unless you know what 'thresh' value to set. Use one of the nsp_* functions below (without _selfnorm) instead.
 	# x - data (referred to in the paper as Y).
 	# constraints - design matrix (referred to in the paper as X).
 	# M - number of intervals to draw; this implementation uses a deterministic equispaced grid for drawing intervals.
 	# thresh - threshold value (lambda_alpha in the paper).
-	# stage1 - obsolete parameter, this will be removed for CRAN.
 	# overlap - FALSE means no overlap, TRUE means an overlap as specified in Section 4 of the paper.
 	# buffer - set to zero if no autoregression present in constraints; otherwise set to the order of the autoregression.
 	#
@@ -28,13 +27,13 @@ nsp <- function(x, constraints, M, thresh, stage1 = "narrowest", overlap = FALSE
 	
 	x.c.ads <- all.dyadic.scans.array(x.c)
 	
-	res <- iter_random_checks_scan_array(c(1, d[1]), x.c.ads, M, thresh, stage1, overlap, buffer)
+	res <- iter_random_checks_scan_array(c(1, d[1]), x.c.ads, M, thresh, overlap, buffer)
 	
 	res
 }
 
 
-nsp_poly <- function(x, M = 1000, thresh = NULL, sigma = NULL, alpha = 0.1, deg = 0, stage1 = "narrowest", overlap = FALSE) {
+nsp_poly <- function(x, M = 1000, thresh = NULL, sigma = NULL, alpha = 0.1, deg = 0, overlap = FALSE) {
 	
 	# NSP implementation when x is believed to be a piecewise polynomial plus iid Gaussian noise. This covers Scenarios 1 and 2 from the paper.
 	# x - data (referred to in the paper as Y).
@@ -43,7 +42,6 @@ nsp_poly <- function(x, M = 1000, thresh = NULL, sigma = NULL, alpha = 0.1, deg 
 	# sigma - estimate of the standard deviation of the noise. If NULL, it is estimated via MAD.
 	# alpha - desired maximum probability of obtaining an interval that does not cover a true change-point.
 	# deg - degree of the underlying polynomial
-	# stage1 - obsolete parameter, this will be removed for CRAN.
 	# overlap - FALSE means no overlap, TRUE means an overlap as specified in Section 4 of the paper.
 	#
 	# Returns:
@@ -69,12 +67,12 @@ nsp_poly <- function(x, M = 1000, thresh = NULL, sigma = NULL, alpha = 0.1, deg 
 		
 	}
 
-	nsp(x, x.c, M, thresh, stage1, overlap)
+	nsp(x, x.c, M, thresh, overlap)
 	
 }
 
 
-nsp_poly_ar <- function(x, ord = 1, M = 1000, thresh = NULL, sigma = NULL, alpha = 0.1, deg = 0, power = 1/2, min.size = 20, stage1 = "narrowest", overlap = FALSE, buffer = ord) {
+nsp_poly_ar <- function(x, ord = 1, M = 1000, thresh = NULL, sigma = NULL, alpha = 0.1, deg = 0, power = 1/2, min.size = 20, overlap = FALSE, buffer = ord) {
 
 	# NSP implementation when x is believed to be a piecewise polynomial plus autoregressive Gaussian noise. This covers Scenario 4 from the paper (with a piecewise polynomial regression part).
 	# x - data (referred to in the paper as Y).
@@ -86,7 +84,6 @@ nsp_poly_ar <- function(x, ord = 1, M = 1000, thresh = NULL, sigma = NULL, alpha
 	# deg - degree of the underlying polynomial
 	# power - parameter of the MOLS estimator of sigma, best left at 1/2.
 	# min.size - parameter of the MOLS estimator of sigma, best left at 20.
-	# stage1 - obsolete parameter, this will be removed for CRAN.
 	# overlap - FALSE means no overlap, TRUE means an overlap as specified in Section 4 of the paper.
 	# buffer - how many time points to skip when recursively launching NSP to the left and right of each detected interval of significance.
 	#
@@ -118,7 +115,7 @@ nsp_poly_ar <- function(x, ord = 1, M = 1000, thresh = NULL, sigma = NULL, alpha
 		thresh <- sigma * thresh.kab(n-ord, alpha)
 	}
 
-	res <- nsp(x, x.c, M, thresh, stage1, overlap, buffer)
+	res <- nsp(x, x.c, M, thresh, overlap, buffer)
 
 	res[1:2,] <- res[1:2,] + ord
 	
@@ -127,7 +124,7 @@ nsp_poly_ar <- function(x, ord = 1, M = 1000, thresh = NULL, sigma = NULL, alpha
 }
 
 
-nsp_tvreg <- function(y, x, M = 1000, thresh = NULL, sigma = NULL, alpha = 0.1, power = 1/2, min.size = 20, stage1 = "narrowest", overlap = FALSE) {
+nsp_tvreg <- function(y, x, M = 1000, thresh = NULL, sigma = NULL, alpha = 0.1, power = 1/2, min.size = 20, overlap = FALSE) {
 	
 	# NSP for general regression, but without autoregression. This covers Scenario 3 from the paper.
 	# y - data (referred to in the paper as Y).
@@ -138,7 +135,6 @@ nsp_tvreg <- function(y, x, M = 1000, thresh = NULL, sigma = NULL, alpha = 0.1, 
 	# alpha - desired maximum probability of obtaining an interval that does not cover a true change-point.
 	# power - parameter of the MOLS estimator of sigma, best left at 1/2.
 	# min.size - parameter of the MOLS estimator of sigma, best left at 20.
-	# stage1 - obsolete parameter, this will be removed for CRAN.
 	# overlap - FALSE means no overlap, TRUE means an overlap as specified in Section 4 of the paper.
 	#
 	# Returns:
@@ -154,7 +150,7 @@ nsp_tvreg <- function(y, x, M = 1000, thresh = NULL, sigma = NULL, alpha = 0.1, 
 		thresh <- sigma * thresh.kab(n, alpha)
 	}
 
-	nsp(y, x, M, thresh, stage1, overlap)
+	nsp(y, x, M, thresh, overlap)
 	
 }
 
@@ -359,7 +355,7 @@ all.dyadic.scans.array <- function(x) {
 }
 
 
-iter_random_checks_scan_array <- function(ind, ads.array, M, thresh, stage1 = "narrowest", overlap = FALSE, buffer = 0) {
+iter_random_checks_scan_array <- function(ind, ads.array, M, thresh, overlap = FALSE, buffer = 0) {
 	
 	s <- ind[1]
 	e <- ind[2]
@@ -373,16 +369,16 @@ iter_random_checks_scan_array <- function(ind, ads.array, M, thresh, stage1 = "n
 		
 	if (n > 1) {
 		
-		next.int <- random_checks_scan_2stage_array(c(1,n), ads.array, M, thresh, stage1)
+		next.int <- random_checks_scan_2stage_array(c(1,n), ads.array, M, thresh)
 		
 		if (!is.na(next.int$selected.ind))  {
 		
 			if (!overlap) {
 			
-			if (next.int$selected.val[1,1]-buffer >= 2) left <- iter_random_checks_scan_array(c(1, next.int$selected.val[1,1]-buffer), ads.array, M, thresh, stage1, overlap, buffer) else left <- matrix(NA, 3, 0)
+			if (next.int$selected.val[1,1]-buffer >= 2) left <- iter_random_checks_scan_array(c(1, next.int$selected.val[1,1]-buffer), ads.array, M, thresh, overlap, buffer) else left <- matrix(NA, 3, 0)
 			if (n - next.int$selected.val[1,2]-buffer >= 1) {
 				
-				right <- iter_random_checks_scan_array(c(next.int$selected.val[1,2]+buffer, n), ads.array, M, thresh, stage1, overlap, buffer)
+				right <- iter_random_checks_scan_array(c(next.int$selected.val[1,2]+buffer, n), ads.array, M, thresh, overlap, buffer)
 				if (dim(right)[2]) right <- right + c(rep(next.int$selected.val[1,2]-1+buffer, 2), 0)
 				
 			}
@@ -392,9 +388,9 @@ iter_random_checks_scan_array <- function(ind, ads.array, M, thresh, stage1 = "n
 			else {
 				
 
-			if (floor(mean(next.int$selected.val[1,1:2]))-buffer >= 2) left <- iter_random_checks_scan_array(c(1, floor(mean(next.int$selected.val[1,1:2]))-buffer), ads.array, M, thresh, stage1, overlap, buffer) else left <- matrix(NA, 3, 0)
+			if (floor(mean(next.int$selected.val[1,1:2]))-buffer >= 2) left <- iter_random_checks_scan_array(c(1, floor(mean(next.int$selected.val[1,1:2]))-buffer), ads.array, M, thresh, overlap, buffer) else left <- matrix(NA, 3, 0)
 			if (n - floor(mean(next.int$selected.val[1,1:2]))-buffer >= 2) {
-				right <- iter_random_checks_scan_array(c(floor(mean(next.int$selected.val[1,1:2]))+1+buffer, n), ads.array, M, thresh, stage1, overlap, buffer)
+				right <- iter_random_checks_scan_array(c(floor(mean(next.int$selected.val[1,1:2]))+1+buffer, n), ads.array, M, thresh, overlap, buffer)
 				if (dim(right)[2]) right <- right + c(rep(floor(mean(next.int$selected.val[1,1:2]))+buffer, 2), 0)
 				
 			}
@@ -419,9 +415,11 @@ iter_random_checks_scan_array <- function(ind, ads.array, M, thresh, stage1 = "n
 }
 
 
-random_checks_scan_2stage_array <- function(ind, ads.array, M, thresh, stage1 = "narrowest") {
-	
-	s1 <- random_checks_scan_array_1by1(ind, ads.array, M, thresh, stage1)
+#random_checks_scan_2stage_array <- function(ind, ads.array, M, thresh, stage1 = "narrowest") {
+
+random_checks_scan_2stage_array <- function(ind, ads.array, M, thresh) {
+		
+	s1 <- random_checks_scan_array_1by1(ind, ads.array, M, thresh)
 		
 	if (!is.na(s1$selected.ind)) {
 		
@@ -434,7 +432,7 @@ random_checks_scan_2stage_array <- function(ind, ads.array, M, thresh, stage1 = 
 			
 			replacement <- s2$selected.val
 			replacement[1,1:2] <- replacement[1,1:2] + s - ind[1]
-			s1$res[s1$selected.ind,] <- replacement
+#			s1$res[s1$selected.ind,] <- replacement
 			s1$selected.val <- replacement
 			
 		}
@@ -447,6 +445,8 @@ random_checks_scan_2stage_array <- function(ind, ads.array, M, thresh, stage1 = 
 
 
 random_checks_scan_array <- function(ind, ads.array, M, thresh, criterion = "narrowest") {
+	
+	# Now obsolete
 
 	s <- ind[1]
 	e <- ind[2]
@@ -514,7 +514,7 @@ random_checks_scan_array <- function(ind, ads.array, M, thresh, criterion = "nar
 }
 
 
-random_checks_scan_array_1by1 <- function(ind, ads.array, M, thresh, criterion = "narrowest") {
+random_checks_scan_array_1by1 <- function(ind, ads.array, M, thresh) {
 
 	s <- ind[1]
 	e <- ind[2]
@@ -549,47 +549,61 @@ random_checks_scan_array_1by1 <- function(ind, ads.array, M, thresh, criterion =
 			
 		}
 
-
-#		res[,3] <- apply(ind, 2, check_interval_array, ads.array, thresh)
-	
-		filtered.res <- res[(res[,3] > 0),, drop = F]
-	
-		d <- dim(filtered.res)
-
-		if (d[1]) {
-		
-			if (criterion == "narrowest") {
-				lnghts <- filtered.res[,2] - filtered.res[,1]
-				min.indices <- which(lnghts == min(lnghts))
-				selected.ind <- min.indices[which.max(filtered.res[min.indices,3])]
-			}
+		if (zero.check) {
 			
-			else if (criterion == "largest") selected.ind <- which.max(filtered.res[,3])
+			selected.ind <- NA
+			selected.val <- matrix(0, 0, 3)
 			
-			selected.val <- filtered.res[selected.ind,,drop=F]
-		
 		}
 
 		else {
-		
-			selected.ind <- NA
-			selected.val <- matrix(0, 0, 3)
-		
+			
+			selected.ind <- j-1
+			selected.val <- res[selected.ind,,drop=FALSE]
+			
 		}
+
+
+	
+#		filtered.res <- res[(res[,3] > 0),, drop = F]
+	
+#		d <- dim(filtered.res)
+
+#		if (d[1]) {
+		
+#			if (criterion == "narrowest") {
+#				lnghts <- filtered.res[,2] - filtered.res[,1]
+#				min.indices <- which(lnghts == min(lnghts))
+#				selected.ind <- min.indices[which.max(filtered.res[min.indices,3])]
+#			}
+			
+#			else if (criterion == "largest") selected.ind <- which.max(filtered.res[,3])
+			
+#			selected.val <- filtered.res[selected.ind,,drop=F]
+		
+#		}
+
+#		else {
+		
+#			selected.ind <- NA
+#			selected.val <- matrix(0, 0, 3)
+		
+#		}
 
 	}
 
 	else {
 		
-		filtered.res <- selected.val <- matrix(0, 0, 3)
+#		filtered.res <- selected.val <- matrix(0, 0, 3)
+		selected.val <- matrix(0, 0, 3)
 		selected.ind <- NA
 		M <- 0
 		
 	}
 	
 
-	list(res=filtered.res, selected.ind = selected.ind, selected.val = selected.val, M.eff=max(1, M))
-
+#	list(res=filtered.res, selected.ind = selected.ind, selected.val = selected.val, M.eff=max(1, M))
+	list(selected.ind = selected.ind, selected.val = selected.val, M.eff=max(1, M))
 
 }
 
