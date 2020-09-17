@@ -608,17 +608,6 @@ random_checks_scan_array_1by1 <- function(ind, ads.array, M, thresh) {
 }
 
 
-all.intervals.flat <- function(n) {
-	
-	if (n==2) ind <- matrix(1:2, 2, 1) else {
-		M <- (n-1)*n/2	
-		ind <- matrix(0, 2, M)
-		ind[1,] <- rep(1:(n-1), (n-1):1)
-		ind[2,] <- 2:(M+1) - rep(cumsum(c(0, (n-2):1)), (n-1):1)
-	}
-	ind
-
-}
 
 all.intervals.sorted <- function(n) {
 	
@@ -628,22 +617,6 @@ all.intervals.sorted <- function(n) {
 	
 }
 
-grid.intervals <- function(n, M) {
-		
-	if ((n==2) || (M == 0)) ind <- matrix(c(1, n), 2, 1)
-	
-	else if (M >= (n-1)*n/2) ind <- all.intervals.flat(n)
-	
-	else {
-		k <- 1
-		while (k*(k-1)/2 < M) k <- k+1
-		ind2 <- all.intervals.flat(k)
-		ind2.mx <- max(ind2)
-		ind <- round((ind2 - 1) * ((n-1) / (ind2.mx-1)) + 1)
-	}	
-	
-	ind	
-}
 
 grid.intervals.sorted <- function(n, M) {
 	
