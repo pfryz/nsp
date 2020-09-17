@@ -9,7 +9,7 @@ To use NSP_for_Github_faster.R, do the following:
 
 - Install the R package [lpSolve](https://CRAN.R-project.org/package=lpSolve).
 - Save wiener_holder_norms.txt to your R working directory.
-- Source NSP_for_Github_faster.R into R.
+- Source both utils.R and NSP_for_Github_faster.R into R.
 - Read the descriptions within NSP_for_Github_faster.R.
 
 This content will be turned into an R package and posted on CRAN at the earliest opportunity.
