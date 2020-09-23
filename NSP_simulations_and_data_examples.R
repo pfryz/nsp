@@ -1,3 +1,5 @@
+# AS OF 23 SEPT 2020, FILE EMPORARILY OBSOLETE AS SOME DATA FORMATS HAVE CHANGED. THIS WILL BE RECTIFIED ASAP.
+
 smuce_coverage <- function(truth, est) {
 	
 	# Returns "TRUE" if the SMUCE estimator "est" is such that each confidence interval covers a true change-point of "truth", and "FALSE" otherwise. See "sim_coverage" for an example of use.
