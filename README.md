@@ -3,7 +3,7 @@ Software to accompany P. Fryzlewicz (2020) "Narrowest Significance Pursuit: infe
 
 The main functions are
 - NSP_for_Github_v*.R (the actual software), and
-- NSP_simulations_and_data_examples.R (as in the title). [AS OF 23 SEPT 2020, THIS FILE IS TEMPORARILY OUT OF DATE AS SOME DATA FORMATS HAVE CHANGED. PLEASE DO NOT ATTEMPT TO USE. THIS WILL BE RECTIFIED ASAP.]
+- NSP_simulations_and_data_examples_v*.R (as in the title).
 
 To use NSP_for_Github_v*.R, do the following:
 
