@@ -557,7 +557,7 @@ all_intervals_sorted <- function(n) {
 	
 	d <- all_intervals_flat(n)
 	d.ord <- order(d[2,] - d[1,])
-	d[,d.ord]
+	d[,d.ord, drop=FALSE]
 	
 }
 
