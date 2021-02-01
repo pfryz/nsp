@@ -199,7 +199,7 @@ lines(sig_quad, col="red", lwd = 3)
 # Example 2 - UK Covid-19 deaths time series.
 
 
-covid.new <- read.csv("Downloads/data_2021-Jan-31.csv")
+covid.new <- read.csv("data_2021-Jan-31.csv")
 Dt <- rev(covid.new[[5]])
 At <- sqrt(2 * Dt + 3/8)
 ts.plot(At, xlab="Time (days starting from 29th February 2020)", ylab = "")
@@ -214,7 +214,7 @@ draw_rects(At.n, c(0, 51))
 
 
 
-nm <- read.csv("Downloads/n.csv")
+nm <- read.csv("n.csv")
 nm[[7]] -> nmp
 n <- 131
 
