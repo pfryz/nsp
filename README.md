@@ -10,9 +10,11 @@ The main files are
 To use NSP_for_Github_v*.R, do the following:
 
 - Install the R package [lpSolve](https://CRAN.R-project.org/package=lpSolve).
-- Save wiener_holder_norms.txt to your R working directory.
+- Save wiener_holder_norms.txt, tight_mres_norms_const.RData, tight_mres_norms_lin.RData to your R working directory.
 - Source NSP_for_Github_v*.R into R.
 - Read the descriptions within NSP_for_Github_v*.R.
+
+Requires R package lpSolve.
 
 B. "Robust Narrowest Significance Pursuit: inference for multiple change-points in the median"
 
