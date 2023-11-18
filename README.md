@@ -27,11 +27,7 @@ Requires R package lpSolve. **(Legacy description ends here.)**
 The main file is
 - RNSP_for_Github_v*.R (the actual software)
 
-Note: some functions required in RNSP_for_Github_v*.R are defined in NSP_for_Github_v*.R.
-
-Requires R package plyr.
-
-
 This content will be turned into an R package and posted on CRAN at the earliest opportunity.
+
 
 Questions/comments? - p.fryzlewicz@lse.ac.uk (Piotr Fryzlewicz)
